@@ -1,0 +1,64 @@
+
+{{template "base" .}}
+
+{{define "title"}}Thought #{{.Thought.ID}}{{end}}
+
+
+{{define "main"}}
+
+  <section class="text-center">
+{{with .Thought}}
+
+            <h4 class="mb-5"><strong>Thoughts Number #{{.ID}}</strong></h4>
+            <div class="row">
+
+
+            <div class="col-lg-4 col-md-12 mb-4">
+                
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card">
+                <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+                    <img src="https://mdbootstrap.com/img/new/standard/nature/023.jpg" class="img-fluid" />
+                    <a href="#!">
+                    <div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>
+                    </a>
+                </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{.Title}}</h5>
+                        <p class="card-text">
+                        {{.Content}}
+                        </p>
+                        <a href="#!" class="btn btn-primary">Button</a>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            
+                            <div class="col-md-6">
+                                <small class="text-muted">{{.Created}}</small>
+                            </div>
+                        
+                        <div class="col-md-6">
+                                <small class="text-muted">{{.Expires}}/small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+               
+            </div>
+            </div>
+        </section>
+
+{{end}}
+{{end}}
+
+
+
+
+
+
