@@ -1,0 +1,64 @@
+{{template "base" .}}
+
+{{define "title"}}Home{{end}}
+
+
+{{define "main"}}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-1"></div>
+
+        <div class="col-md-10">
+
+            <div class="card text-center">
+                <div class="card-header"><b>Sign Up</b></div>
+                <div class="card-body">
+                    <div class="col-md-6 offset-md-3">
+                        {{with .Form}}
+                        <form method="POST" action="/user/signup">
+                            {{with .Errors.Get "name"}}
+                            <small id="emailHelp" class="form-text text-danger">{{.}}</small>
+                            {{end}}
+                            <div class="form-outline mb-4">
+                                <input type="text" name="name" id="form1Example1" class="form-control"
+                                    value='{{.Get "name"}}' />
+                                <label class="form-label" for="form1Example1">Name</label>
+                            </div>
+
+                            {{with .Errors.Get "email"}}
+                            <small id="emailHelp" class="form-text text-danger">{{.}}</small>
+                            {{end}}
+                            <div class="form-outline mb-4">
+                                <input type="text" name="email" id="form1Example1" class="form-control"
+                                    value='{{.Get "email"}}' />
+                                <label class="form-label" for="form1Example1">Email</label>
+                            </div>
+
+                            {{with .Errors.Get "password"}}
+                            <small id="emailHelp" class="form-text text-danger">{{.}}</small>
+                            {{end}}
+                            <div class="form-outline mb-4">
+                                <input type="text" name="password" id="form1Example1" class="form-control"
+                                     />
+                                <label class="form-label" for="form1Example1">Password</label>
+                            </div>
+
+                            
+
+                           
+                            <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                        </form>
+                        {{end}}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+{{end}}

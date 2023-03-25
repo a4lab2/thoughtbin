@@ -1,111 +1,138 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
-	"text/template"
+
+	"a4lab2.com/thoughtbin/pkg/forms"
+	"a4lab2.com/thoughtbin/pkg/models"
 )
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
 
 	data, err := app.thoughts.Latest()
 	if err != nil {
 		app.notFound(w)
-		// return nil, err
+		return
 	}
-
-	// data, err := app.thoughts.Get(id)
 
 	dat := &templateData{
 		Thoughts: data,
 	}
 
-	// fmt.Fprintf(w, "Show thought %+v\n", data)
+	app.render(w, r, "home.page.gohtml", dat)
 
-	files := []string{
-		"./ui/html/home.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Println(err.Error())
-		app.serverError(w, err)
-	}
-	err = ts.Execute(w, dat)
-	if err != nil {
-		log.Println(err.Error())
-		app.serverError(w, err)
-		return
-	}
 }
 
 func (app *Application) showThought(w http.ResponseWriter, r *http.Request) {
 
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
 	if err != nil {
 		app.notFound(w)
 		return
 	}
 	data, err := app.thoughts.Get(id)
+	if err != nil {
+		app.notFound(w)
+
+	}
 
 	dat := &templateData{
 		Thought: data,
 	}
-	files := []string{
-		"./ui/html/show.page.gohtml",
-		"./ui/html/base.layout.gohtml",
-		"./ui/html/footer.partial.gohtml",
-	}
-	if err != nil {
-		app.notFound(w)
-		// return nil, err
-	}
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Println(err.Error())
-		app.serverError(w, err)
-	}
-	err = ts.Execute(w, dat)
-	if err != nil {
-		log.Println(err.Error())
-		app.serverError(w, err)
-		return
-	}
+	app.render(w, r, "show.page.gohtml", dat)
 }
 
 func (app *Application) createThought(w http.ResponseWriter, r *http.Request) {
 
-	// if r.Method != http.MethodPost {
-
-	// 	w.Header().Set("Allow", http.MethodPost)
-	// 	app.clientError(w, http.StatusBadRequest)
-	// 	return
-	// }
-
-	// f := models.Thought{
-	// 	Title:   "x snail",
-	// 	Content: "x snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n Kobayashi Issa",
-	// 	Expires: 7,
-	// }
-
-	title1 := "1 snail"
-	content1 := "1 snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n Kobayashi Issa"
-	expires1 := "7"
-
-	id, err := app.thoughts.Insert(title1, content1, expires1)
+	err := r.ParseForm()
 	if err != nil {
-		log.Println(err.Error())
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("title", "content", "expires")
+	form.MaxLenght("title", 100)
+	form.PermittedValues("expires", "365", "7", "1")
+
+	if !form.Valid() {
+		app.render(w, r, "create.page.gohtml", &templateData{
+			Form: form,
+		})
+	}
+
+	id, err := app.thoughts.Insert(form.Get("title"), form.Get("content"), form.Get("content"))
+	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-	fmt.Fprintf(w, "Created thought ID: %d ", id)
+	//set session and redirect to the created thought
+	app.session.Put(r, "flash", "Snippet successfully created!")
+	http.Redirect(w, r, fmt.Sprintf("/thought/%d", id), http.StatusSeeOther)
+
+}
+
+func (app *Application) createThoughtForm(w http.ResponseWriter, r *http.Request) {
+
+	app.render(w, r, "create.page.gohtml", &templateData{
+		Form: forms.New(nil),
+	})
+
+}
+
+//auths
+
+func (app *Application) signupUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "signup.page.gohtml", &templateData{
+		Form: forms.New(nil),
+	})
+}
+func (app *Application) signupUser(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	form := forms.New(r.PostForm)
+	form.Required("name", "email", "password")
+	form.MaxLenght("name", 255)
+	form.MaxLenght("email", 255)
+	form.MatchesPattern("email", forms.EmailRX)
+	form.MinLength("password", 10)
+
+	if !form.Valid() {
+		app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
+		return
+	}
+
+	err = app.users.Insert(form.Get("name"), form.Get("email"), form.Get("password"))
+	if err != nil {
+		if errors.Is(err, models.ErrDuplicateEmail) {
+			form.Errors.Add("email", "Address is already in use")
+			app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+
+	fmt.Fprintln(w, "Create a new user...")
+}
+func (app *Application) loginUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "login.page.gohtml", &templateData{
+		Form: forms.New(nil),
+	})
+}
+func (app *Application) loginUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate and login the user...")
+}
+func (app *Application) logoutUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Logout the user...")
 }

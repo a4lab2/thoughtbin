@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 func (app *Application) serverError(w http.ResponseWriter, err error) {
@@ -18,4 +20,30 @@ func (app *Application) clientError(w http.ResponseWriter, status int) {
 
 func (app *Application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
+}
+
+func (app *Application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
+	ts, ok := app.templateCache[name]
+	if !ok {
+		app.serverError(w, fmt.Errorf("the template %s does not exist", name))
+	}
+
+	buf := new(bytes.Buffer)
+
+	err := ts.Execute(buf, app.addDefaults(td, r))
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	buf.WriteTo(w)
+}
+
+func (app *Application) addDefaults(td *templateData, r *http.Request) *templateData {
+	if td == nil {
+		td = &templateData{}
+	}
+	td.Flash = app.session.PopString(r, "flash")
+
+	td.CurrentYear = time.Now().Year()
+	return td
 }

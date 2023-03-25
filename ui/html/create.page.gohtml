@@ -1,0 +1,82 @@
+{{template "base" .}}
+
+{{define "title"}}Home{{end}}
+
+
+{{define "main"}}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-1"></div>
+
+        <div class="col-md-10">
+
+            <div class="card text-center">
+                <div class="card-header"><b>Create Thought</b></div>
+                <div class="card-body">
+                    <div class="col-md-12">
+                        {{with .Form}}
+                        <form method="POST" action="/thought/create">
+                            {{with .Errors.Get "title"}}
+                            <small id="emailHelp" class="form-text text-danger">{{.}}</small>
+                            {{end}}
+                            <div class="form-outline mb-4">
+                                <input type="text" name="title" id="form1Example1" class="form-control"
+                                    value='{{.Get "title"}}' />
+                                <label class="form-label" for="form1Example1">Title</label>
+                            </div>
+                            {{with .Errors.Get "content"}}
+                            <small id="emailHelp" class="form-text text-danger">{{.}}</small>
+                            {{end}}
+                            <div class="form-outline mb-4">
+                                <textarea name="content" class="form-control" id="textAreaExample" rows="4">{{.Get "content"}}
+                                </textarea>
+                                <label class="form-label" for="textAreaExample">Message</label>
+                            </div>
+
+                            <div class="card-footer text-muted">
+                                <small>
+                                    Delete in:
+                                    {{with .Errors.Get "expires"}}
+                                    <small id="emailHelp" class="form-text text-danger">{{.}}</small>
+                                    {{end}}
+
+                                    {{$exp := or (.Get "expires") "365"}}
+                                    <div>
+                                        <div class="form-check form-check-inline input-group-sm">
+                                            <input class="form-check-input" type="radio" name="expires"
+                                                id="inlineRadio1" value="365" {{if (eq $exp "365" )}}checked{{end}}>
+                                            <label class="form-check-label" for="inlineRadio1">One Year</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="expires"
+                                                id="inlineRadio2" value="7" {{if (eq $exp "7" )}}checked{{end}}>
+                                            <label class="form-check-label" for="inlineRadio2">One Week</label>
+                                        </div>
+
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="expires"
+                                                id="inlineRadio2" value="1" {{if (eq $exp "1" )}}checked{{end}}>
+                                            <label class="form-check-label" for="inlineRadio2">One Day</label>
+                                        </div>
+
+                                    </div>
+
+
+                                </small>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Publish Thought</button>
+                        </form>
+                        {{end}}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+{{end}}

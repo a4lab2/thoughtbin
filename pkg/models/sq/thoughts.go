@@ -1,6 +1,7 @@
 package sq
 
 import (
+	"strconv"
 	"time"
 
 	"a4lab2.com/thoughtbin/pkg/models"
@@ -13,8 +14,10 @@ type ThoughtModel struct {
 
 // title, content, expires string
 func (m *ThoughtModel) Insert(title, content, expires string) (uint, error) {
-
-	thought := models.Thought{Title: title, Content: content, Expires: time.Now()}
+	t := time.Now()
+	expires_int, _ := strconv.Atoi(expires)
+	expire_date := t.AddDate(0, 0, expires_int)
+	thought := models.Thought{Title: title, Content: content, Expires: expire_date}
 	_ = m.DB.Create(&thought)
 	id := thought.ID
 	return id, nil
@@ -39,6 +42,6 @@ func (m *ThoughtModel) Get(id int) (*models.Thought, error) {
 
 func (m *ThoughtModel) Latest() ([]*models.Thought, error) {
 	var thoughts []*models.Thought
-	err := m.DB.Order("ID desc").Limit(3).Find(&thoughts).Error
+	err := m.DB.Order("ID desc").Limit(9).Find(&thoughts).Error
 	return thoughts, err
 }
