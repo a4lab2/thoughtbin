@@ -1,6 +1,7 @@
 package sq
 
 import (
+	"errors"
 	"strings"
 
 	"a4lab2.com/thoughtbin/pkg/models"
@@ -28,9 +29,42 @@ func (m *UserModel) Insert(name, email, password string) error {
 	}
 	return nil
 }
-func (m *UserModel) Authenticate(email, password string) (int, error) {
-	return 0, nil
+func (m *UserModel) Authenticate(email, password string) (uint, error) {
+	var user models.User
+	// var id int
+	// var hashedPass []byte
+	row := m.DB.Select("ID", "HashedPassword").First(&user, "email = ? AND active = ?", email, true)
+
+	if row.Error != nil {
+		if errors.Is(row.Error, gorm.ErrRecordNotFound) {
+			return 0, models.ErrInvalidCredentials
+		}
+	} else {
+		return 0, row.Error
+	}
+
+	err := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(password))
+
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, models.ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+	//Otherwise, the password is correct. Return the user ID.
+	return user.ID, nil
 }
+
 func (m *UserModel) Get(id int) (*models.User, error) {
-	return nil, nil
+	u := &models.User{}
+	row := m.DB.Select("ID", "name", "email", "created", "active").First(&u, "ID = ? ", id)
+	if row.Error != nil {
+		if errors.Is(row.Error, gorm.ErrRecordNotFound) {
+			return nil, models.ErrNoRecord
+		}
+	} else {
+		return nil, row.Error
+	}
+	return u, nil
 }

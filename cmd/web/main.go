@@ -19,6 +19,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type contextKey string
+
+const contextKeyIsAuthenticated = contextKey("isAuthenticated")
+
 type Config struct {
 	Addr      string
 	StaticDir string
@@ -67,6 +71,8 @@ func main() {
 
 	session := sessions.New([]byte(*secret))
 	session.Lifetime = 12 * time.Hour
+	session.Secure = true
+	session.SameSite = http.SameSiteStrictMode
 
 	app := &Application{
 		errorlog: errorLog,

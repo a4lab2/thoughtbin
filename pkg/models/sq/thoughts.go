@@ -36,7 +36,6 @@ func (m *ThoughtModel) BatchInsert(thoughts []models.Thought) ([]uint, error) {
 func (m *ThoughtModel) Get(id int) (*models.Thought, error) {
 	var thought models.Thought
 	err := m.DB.First(&thought, id).Error // Check if returns RecordNotFound error
-
 	return &thought, err
 }
 

@@ -45,7 +45,7 @@
                 <!-- Collapsible wrapper -->
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Navbar brand -->
-                    <a class="navbar-brand mt-2 mt-lg-0" href="#">
+                    <a class="navbar-brand mt-2 mt-lg-0" href="/">
                         <img src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp" height="15"
                             alt="MDB Logo" loading="lazy" />
                     </a>
@@ -59,13 +59,12 @@
                     <a class="text-reset me-3" href="/">
                         <i class="fa-solid fa-home"></i>
                     </a>
+
+                    {{if .IsAuthenticated}}
                     <a class="text-reset me-3" href="/thought/create">
                         <i class="fa-solid fa-pen"></i>
                     </a>
-
-                    <a class="text-reset me-3" href="/user/login">
-                        <i class="fa-solid fa-sign-in"></i>
-                    </a>
+                    {{end}}
 
 
 
@@ -84,6 +83,8 @@
                         </ul>
                     </div>
                     <!-- Avatar -->
+
+                    {{if .IsAuthenticated}}
                     <div class="dropdown">
                         <a class="dropdown-toggle d-flex align-items-center hidden-arrow" href="#"
                             id="navbarDropdownMenuAvatar" role="button" data-mdb-toggle="dropdown"
@@ -100,12 +101,38 @@
                             </li>
                             <li>
                                 <form action='/user/logout' method='POST'>
+                                    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+
                                     <input class="dropdown-item" type="submit" value="Logout">
                                 </form>
 
                             </li>
                         </ul>
                     </div>
+                    {{else}}
+                    <div class="dropdown">
+                        <a class="dropdown-toggle d-flex align-items-center hidden-arrow" href="#"
+                            id="navbarDropdownMenuAvatar" role="button" data-mdb-toggle="dropdown"
+                            aria-expanded="false">
+                            <img src="https://mdbcdn.b-cdn.net/img/new/avatars/2.webp" class="rounded-circle"
+                                height="25" alt="Black and White Portrait of a Man" loading="lazy" />
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuAvatar">
+                            <li>
+                                <a class="dropdown-item" href="/user/login">
+                                    Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/user/signup">
+                                    Sign Up
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    {{end}}
+
                 </div>
                 <!-- Right elements -->
             </div>
