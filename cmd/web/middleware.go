@@ -78,7 +78,7 @@ func (app *Application) authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := app.users.Get(app.session.GetInt(r, "authenticatedUserID"))
+		user, err := app.users.Get(uint(app.session.GetInt(r, "authenticatedUserID")))
 		if errors.Is(err, models.ErrNoRecord) || !user.Active {
 			app.session.Remove(r, "authenticatedUserID")
 			next.ServeHTTP(w, r)

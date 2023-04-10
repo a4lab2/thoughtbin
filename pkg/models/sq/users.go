@@ -56,7 +56,7 @@ func (m *UserModel) Authenticate(email, password string) (uint, error) {
 	return user.ID, nil
 }
 
-func (m *UserModel) Get(id int) (*models.User, error) {
+func (m *UserModel) Get(id uint) (*models.User, error) {
 	u := &models.User{}
 	row := m.DB.Select("ID", "name", "email", "created", "active").First(&u, "ID = ? ", id)
 	if row.Error != nil {

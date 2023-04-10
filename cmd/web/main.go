@@ -29,11 +29,21 @@ type Config struct {
 }
 
 type Application struct {
-	errorlog      *log.Logger
-	infoLog       *log.Logger
-	session       *sessions.Session
-	thoughts      *sq.ThoughtModel
-	users         *sq.UserModel
+	errorlog *log.Logger
+	infoLog  *log.Logger
+	session  *sessions.Session
+
+	//Make the models an interface whereby anything that satisfy thier conds will be accepted, to enable us use it in testing
+	thoughts interface {
+		Insert(string, string, string) (uint, error)
+		Get(uint) (*models.Thought, error)
+		Latest() ([]*models.Thought, error)
+	}
+	users interface {
+		Insert(string, string, string) error
+		Authenticate(string, string) (uint, error)
+		Get(uint) (*models.User, error)
+	}
 	templateCache map[string]*template.Template
 }
 

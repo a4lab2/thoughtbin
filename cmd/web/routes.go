@@ -18,7 +18,7 @@ func (app *Application) routes() http.Handler {
 	mux := pat.New()
 	// mux.Get("/thought/:id", http.HandlerFunc(app.showThought))
 	mux.Get("/", dynamicMiddleware.ThenFunc(app.home))
-	mux.Get("/thought/create", dynamicMiddleware.ThenFunc(app.createThoughtForm))
+	mux.Get("/thought/create", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.createThoughtForm))
 	mux.Post("/thought/create", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.createThought))
 	mux.Get("/thought/:id", dynamicMiddleware.Append(app.requireAuthentication).ThenFunc(app.showThought))
 

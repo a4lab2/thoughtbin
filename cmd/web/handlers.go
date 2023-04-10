@@ -33,7 +33,7 @@ func (app *Application) showThought(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
-	data, err := app.thoughts.Get(id)
+	data, err := app.thoughts.Get(uint(id))
 	if err != nil {
 		app.notFound(w)
 
@@ -123,7 +123,6 @@ func (app *Application) signupUser(w http.ResponseWriter, r *http.Request) {
 	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 
-	fmt.Fprintln(w, "Create a new user...")
 }
 func (app *Application) loginUserForm(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "login.page.gohtml", &templateData{
